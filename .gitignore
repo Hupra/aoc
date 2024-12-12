@@ -1,0 +1,16 @@
+ignore/
+.devcontainer/.env
+
+# Rust build files
+target/
+debug/
+release/
+Cargo.lock
+
+# Rust backup files
+**/*.rs.bk
+
+
+# aoc inputs
+aoc/inputs/*
+!aoc/inputs/.gitkeep

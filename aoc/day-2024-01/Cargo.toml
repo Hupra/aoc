@@ -1,0 +1,15 @@
+[package]
+name = "day-2024-01"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustlind-lib = { path = "../../lib" }
+aoc-lib = { path = "../aoc-lib" }
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark_loops"
+harness = false

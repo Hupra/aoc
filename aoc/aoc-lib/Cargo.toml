@@ -1,0 +1,7 @@
+[package]
+name = "aoc-lib"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustlind-lib = { path = "../../lib" }

@@ -1,0 +1,9 @@
+[package]
+name = "henrik"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+csv = "1.2"
+ahash = "0.7"
+either = "1.8"
