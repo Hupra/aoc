@@ -90,39 +90,43 @@ fn p2(lines: Vec<String>) -> i32 {
     let s: (usize, usize) = (0, 1);
     let t: (usize, usize) = (m.len() - 1, m[0].len() - 2);
 
-    fn longest_path_64(a: u64, mut v: u64, g: &Graph<u64, i32>, t: u64) -> i32 {
-        if a == t {
-            return 0;
-        }
-        v += a;
+    return g.longest_path(s, t).0;
 
-        let mut best: i32 = i32::MIN;
+    // really fast longest path algorithm, only works on <= 64 nodes
 
-        let adj = g.adj.get(&a);
-        if let Some(bs) = adj {
-            for e in bs {
-                if e.b & v == 0 {
-                    best = best.max(e.c + longest_path_64(e.b, v, g, t))
-                }
-            }
-        }
-        best
-    }
+    // fn longest_path_64(a: u64, mut v: u64, g: &Graph<u64, i32>, t: u64) -> i32 {
+    //     if a == t {
+    //         return 0;
+    //     }
+    //     v += a;
 
-    let speed = g.shrink(s).speedify();
-    let ng = speed.0;
-    let i_t = speed.1;
-    let t_i = speed.2;
-    dbg!(i_t.len());
+    //     let mut best: i32 = i32::MIN;
 
-    let g_u64 = ng.map_graph(|x| 1u64 << x);
+    //     let adj = g.adj.get(&a);
+    //     if let Some(bs) = adj {
+    //         for e in bs {
+    //             if e.b & v == 0 {
+    //                 best = best.max(e.c + longest_path_64(e.b, v, g, t))
+    //             }
+    //         }
+    //     }
+    //     best
+    // }
 
-    let ns = 1u64 << t_i.get(&s).unwrap();
-    let nt = 1u64 << t_i.get(&t).unwrap();
+    // let speed = g.shrink(s).speedify();
+    // let ng = speed.0;
+    // let i_t = speed.1;
+    // let t_i = speed.2;
+    // dbg!(i_t.len());
 
-    let res = longest_path_64(ns, 0, &g_u64, nt);
+    // let g_u64 = ng.map_graph(|x| 1u64 << x);
 
-    res
+    // let ns = 1u64 << t_i.get(&s).unwrap();
+    // let nt = 1u64 << t_i.get(&t).unwrap();
+
+    // let res = longest_path_64(ns, 0, &g_u64, nt);
+
+    // res
 }
 
 fn main() {

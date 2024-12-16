@@ -51,10 +51,34 @@ fn p1(lines: Vec<String>) -> usize {
     sum
 }
 
+fn find_seq(s: &Vec<usize>, f: impl Fn(usize) -> bool) -> Vec<(usize, usize)> {
+    let mut list: Vec<(usize, usize)> = Vec::new();
+    let mut start: usize = 0;
+
+    for i in 1..s.len() {
+        let pre = s[i - 1];
+        let cur = s[i];
+        if f(pre) && pre != cur {
+            list.push((start, i - 1));
+        }
+        if pre != cur {
+            start = i;
+        }
+        if f(cur) && i == s.len() - 1 {
+            list.push((start, i));
+        }
+    }
+
+    list
+}
+
+// skiv part 2 helt om til at bruge et vec usize, og stop med regex, lav et rigtigt loop :(
+// loop tilføj til den ene / anden side
+// break din if på cur_int != last_int
 fn p2(lines: Vec<String>) -> usize {
     let mut sum: usize = 0;
     for line in lines {
-        let mut s: Vec<char> = line
+        let mut s: Vec<usize> = line
             .chars()
             .chunks(2)
             .into_iter()
@@ -62,57 +86,56 @@ fn p2(lines: Vec<String>) -> usize {
             .map(|(i, chunk)| {
                 let ab: Vec<char> = chunk.collect();
                 let a = ab[0].to_digit(10).unwrap() as usize;
-                let mut r = vec![char::from_u32(i as u32).unwrap(); a];
+                //insert the numbers
+                let mut r = vec![i; a];
+                //insert dots (the if is for the case of the last element that doesnt have a dots numbers)
                 if ab.len() == 2 {
                     let b = ab[1].to_digit(10).unwrap() as usize;
-                    r.extend(vec!['.'; b as usize]);
+                    r.extend(vec![usize::MAX; b as usize]);
                 }
                 r
             })
             .flat_map(|vc| vc)
-            .collect::<Vec<char>>();
+            .collect::<Vec<usize>>();
+        // find dots + nums ranges
+        let mut dots = find_seq(&s, |x| x == usize::MAX);
+        let mut nums = find_seq(&s, |x| x != usize::MAX);
+        nums.reverse();
 
-        let ts = s.iter().collect::<String>();
-
-        let re = Regex::new(r"\u{10ffff}+").unwrap();
-        let mut dots: Vec<(usize, usize)> =
-            re.find_iter(&ts).map(|m| (m.start(), m.end())).collect();
-
-        let re = Regex::new(r"[^\u{10FFFF}]+").unwrap();
-        let mut not_dots: Vec<(usize, usize)> =
-            re.find_iter(&ts).map(|m| (m.start(), m.end())).collect();
-
-        not_dots.reverse();
-
-        for (i, n_dot) in not_dots.iter().enumerate() {
-            let n_dot_len = n_dot.1 - n_dot.0;
-
+        // move through nums in reverse order as we try to move the last one first
+        for num in nums {
+            let num_len = 1 + num.1 - num.0;
+            //find a valid spot for the number to be moved to
             for (j, dot) in dots.iter().enumerate() {
-                let dot_len = dot.1 - dot.0;
-                // let char = ts.chars().nth(i.0).unwrap();
-                if n_dot_len <= dot_len {
-                    // for x in i.0..i.1 {
-                    //     s[x] = char::MAX;
-                    // }
-                    // for x in j.0..j.0 + i_len {
-                    //     s[x] = 'x';
-                    // }
+                // makre sure dots is left of num
+                if dot.0 > num.0 {
+                    break;
+                }
+                let dot_len = 1 + dot.1 - dot.0;
+                // check if num fits in dot slot
+                if num_len <= dot_len {
+                    for x in dot.0..dot.0 + num_len {
+                        s[x] = s[num.0];
+                    }
+                    for x in num.0..=num.1 {
+                        s[x] = usize::MAX;
+                    }
 
-                    println!("{:?} {:?}", dot, n_dot);
-
-                    dots.remove(j);
+                    // update how how many dots are left, or remove the dot range as it's used
+                    if num_len != dot_len {
+                        dots[j] = (dot.0 + num_len, dot.1);
+                    } else {
+                        dots.remove(j);
+                    }
 
                     break;
                 }
             }
         }
 
-        dbg!(s.len());
-        dbg!(ts.len());
-
-        for (i, c) in s.iter().enumerate() {
-            if *c != char::MAX {
-                sum += i * *c as u32 as usize;
+        for (i, num) in s.iter().enumerate() {
+            if *num != usize::MAX {
+                sum += i * num;
             }
         }
     }

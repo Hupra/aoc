@@ -249,6 +249,63 @@ where
         path.reverse();
         (dist[&end], path)
     }
+
+    pub fn longest_path(&self, s: T, t: T) -> (i32, Vec<T>) {
+        let speed = self.shrink(s.clone()).speedify();
+
+        let ng = speed.0;
+        let i_t = speed.1;
+        let t_i = speed.2;
+
+        let ns = *t_i.get(&s).unwrap();
+        let nt = *t_i.get(&t).unwrap();
+
+        let res = longest_path_rec(ns, Vec::new(), &ng, nt);
+
+        let path = res.1.into_iter().map(|i| i_t[i].clone()).collect();
+        return (res.0, path);
+
+        fn longest_path_rec(
+            a: usize,
+            mut v: Vec<usize>,
+            g: &Graph<usize, i32>,
+            t: usize,
+        ) -> (i32, Vec<usize>) {
+            if a == t {
+                v.push(a);
+                return (0, v);
+            }
+
+            v.push(a);
+            let mut best = i32::MIN;
+            let mut best_path = vec![];
+
+            if let Some(adj) = g.adj.get(&a) {
+                for e in adj {
+                    if !v.contains(&e.b) {
+                        // Clone the path for the recursive call
+                        let (cost, path) = longest_path_rec(e.b, v.clone(), g, t);
+                        let total_cost = e.c + cost;
+                        if total_cost > best {
+                            best = total_cost;
+                            best_path = path;
+                        }
+                    }
+                }
+            }
+
+            // If no path is found, return an empty path and minimum cost
+            if best == i32::MIN {
+                return (best, vec![]);
+            }
+
+            // Prepend the current node to the best path
+            let mut full_path = vec![a];
+            full_path.extend(best_path);
+
+            (best, full_path)
+        }
+    }
 }
 
 impl<T, C> Graph<T, C> {
