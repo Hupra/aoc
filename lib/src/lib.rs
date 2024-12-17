@@ -5,9 +5,9 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::error::Error;
 use std::fs::{create_dir_all, File};
-use std::i32;
 use std::io::Write;
 use std::path::Path;
+use std::{i32, usize};
 
 pub fn download_file(url: &str, dest: &str, session_cookie: &str) -> Result<(), Box<dyn Error>> {
     let dest_dir = Path::new(dest).parent().unwrap();
@@ -383,4 +383,12 @@ pub fn re_nums_neg(input: &str) -> Vec<i32> {
     re.find_iter(input)
         .filter_map(|mat| mat.as_str().parse::<i32>().ok())
         .collect()
+}
+
+// Matrix magic
+pub fn get_or<T: Copy>(ij: (i32, i32), m: &Vec<Vec<T>>, or: T) -> T {
+    if ij.0 < 0 || ij.1 < 0 || ij.0 >= m.len() as i32 || ij.1 >= m[ij.0 as usize].len() as i32 {
+        return or;
+    }
+    return m[ij.0 as usize][ij.1 as usize];
 }
