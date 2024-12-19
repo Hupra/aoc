@@ -234,6 +234,86 @@ where
 
         (dist, prev)
     }
+
+    pub fn dijkstra_all(&self, start: T) -> (HashMap<T, i32>, HashMap<T, HashSet<T>>) {
+        let mut dist: HashMap<T, i32> = HashMap::new();
+        let mut prev: HashMap<T, HashSet<T>> = HashMap::new();
+        let mut heap: BinaryHeap<State<T>> = BinaryHeap::new();
+
+        dist.insert(start.clone(), 0);
+        heap.push(State {
+            cost: 0,
+            node: start.clone(),
+        });
+
+        while let Some(State { cost, node }) = heap.pop() {
+            if cost > *dist.entry(node.clone()).or_insert(i32::MAX) {
+                continue;
+            }
+            if let Some(edges) = self.adj.get(&node) {
+                for edge in edges {
+                    let new_cost = cost + edge.c;
+                    let cur_cost = *dist.get(&edge.b).unwrap_or(&i32::MAX);
+                    if new_cost < cur_cost {
+                        dist.insert(edge.b.clone(), new_cost);
+                        prev.insert(edge.b.clone(), HashSet::from([edge.a.clone()]));
+                        heap.push(State {
+                            cost: new_cost,
+                            node: edge.b.clone(),
+                        });
+                    }
+                    if new_cost == cur_cost {
+                        if let Some(hs) = prev.get_mut(&edge.b) {
+                            hs.insert(edge.a.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        (dist, prev)
+    }
+
+    pub fn shortest_paths(&self, start: T, end: T) -> Option<(i32, Vec<Vec<T>>)> {
+        let (dist, prev) = self.dijkstra_all(start.clone());
+
+        // If the end node is not reachable, return None
+        if !dist.contains_key(&end) {
+            return None;
+        }
+
+        let mut all_paths = Vec::new();
+        let mut current_path = vec![end.clone()];
+
+        // Recursive helper function to build paths
+        fn build_paths<T: Clone + Eq + std::hash::Hash + Ord>(
+            prev: &HashMap<T, HashSet<T>>,
+            current: &T,
+            start: &T,
+            current_path: &mut Vec<T>,
+            all_paths: &mut Vec<Vec<T>>,
+        ) {
+            if current == start {
+                let mut path = current_path.clone();
+                path.reverse();
+                all_paths.push(path);
+                return;
+            }
+
+            if let Some(parents) = prev.get(current) {
+                for parent in parents {
+                    current_path.push(parent.clone());
+                    build_paths(prev, parent, start, current_path, all_paths);
+                    current_path.pop();
+                }
+            }
+        }
+
+        build_paths(&prev, &end, &start, &mut current_path, &mut all_paths);
+
+        Some((dist[&end], all_paths))
+    }
+
     pub fn shortest_path(&self, start: T, end: T) -> (i32, Vec<T>) {
         let (dist, prev) = self.dijkstra(start.clone());
         let mut path = vec![];
