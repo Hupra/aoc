@@ -85,9 +85,7 @@ fn p2(lines: Vec<String>) -> i32 {
                 if p.len() == mas.len() {
                     let is_match = (0..p.len()).all(|x| m[p[x].0][p[x].1] == mas[x]);
                     if is_match {
-                        {
-                            valid += 1;
-                        }
+                        valid += 1;
                     }
                 }
             }

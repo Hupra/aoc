@@ -6,6 +6,7 @@ use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::error::Error;
 use std::fs::{create_dir_all, File};
 use std::io::Write;
+use std::mem::swap;
 use std::path::Path;
 use std::{i32, usize};
 
@@ -391,4 +392,28 @@ pub fn get_or<T: Copy>(ij: (i32, i32), m: &Vec<Vec<T>>, or: T) -> T {
         return or;
     }
     return m[ij.0 as usize][ij.1 as usize];
+}
+
+pub fn m_swap(a: (i32, i32), b: (i32, i32), m: &mut Vec<Vec<char>>) {
+    let a_i = a.0 as usize;
+    let a_j = a.1 as usize;
+    let b_i = b.0 as usize;
+    let b_j = b.1 as usize;
+
+    let tmp = m[a_i][a_j];
+    m[a_i][a_j] = m[b_i][b_j];
+    m[b_i][b_j] = tmp;
+}
+// Tuple helpers
+#[macro_export]
+macro_rules! tadd {
+    ($tuple1:expr, $tuple2:expr) => {
+        ($tuple1.0 + $tuple2.0, $tuple1.1 + $tuple2.1)
+    };
+}
+
+macro_rules! tmul {
+    ($t:expr, $mul:expr) => {
+        ($t.0 * $mul, $t.1 * $mul)
+    };
 }
