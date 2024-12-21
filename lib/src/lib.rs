@@ -313,7 +313,7 @@ where
         Some((dist[&end], all_paths))
     }
 
-    pub fn shortest_path(&self, start: T, end: T) -> (i32, Vec<T>) {
+    pub fn shortest_path(&self, start: T, end: T) -> (Option<i32>, Vec<T>) {
         let (dist, prev) = self.dijkstra(start.clone());
         let mut path = vec![];
         let mut current = end.clone();
@@ -327,7 +327,7 @@ where
             }
         }
         path.reverse();
-        (dist[&end], path)
+        (dist.get(&end).and_then(|&x| Some(x)), path)
     }
 
     pub fn longest_path(&self, s: T, t: T) -> (i32, Vec<T>) {
