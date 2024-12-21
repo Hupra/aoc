@@ -6,7 +6,6 @@ use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::error::Error;
 use std::fs::{create_dir_all, File};
 use std::io::Write;
-use std::mem::swap;
 use std::path::Path;
 use std::{i32, usize};
 
@@ -492,8 +491,8 @@ macro_rules! tadd {
     };
 }
 
-macro_rules! tmul {
-    ($t:expr, $mul:expr) => {
-        ($t.0 * $mul, $t.1 * $mul)
-    };
-}
+// macro_rules! tmul {
+//     ($t:expr, $mul:expr) => {
+//         ($t.0 * $mul, $t.1 * $mul)
+//     };
+// }

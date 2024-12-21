@@ -1,6 +1,6 @@
 use aoc_lib::init;
 use rustlind_lib::*;
-use std::{collections::HashSet, path, time::Instant};
+use std::{collections::HashSet, time::Instant};
 
 fn add_edge_wrapper(
     a: (i32, i32, char),
@@ -27,18 +27,12 @@ fn solve(lines: Vec<String>) -> (usize, usize) {
 
     for i in 0..m.len() as i32 {
         for j in 0..m[i as usize].len() as i32 {
-            let char = get_or((i, j), &m, '#');
-
-            if char == 'S' {
-                s = (i, j);
+            match get_or((i, j), &m, '#') {
+                'S' => s = (i, j),
+                'E' => t = (i, j),
+                '#' => continue,
+                _ => {}
             }
-            if char == 'E' {
-                t = (i, j);
-            }
-            if char == '#' {
-                continue;
-            }
-
             add_edge_wrapper((i, j, '|'), (i + 1, j, '|'), 1, &mut g, &m);
             add_edge_wrapper((i, j, '|'), (i - 1, j, '|'), 1, &mut g, &m);
             add_edge_wrapper((i, j, '|'), (i, j + 1, '-'), 1_001, &mut g, &m);
@@ -71,5 +65,5 @@ fn solve(lines: Vec<String>) -> (usize, usize) {
 fn main() {
     let lines = init(2024, 16);
     let timer = Instant::now();
-    println!("{:?} | time: {:?}", solve(lines.clone()), timer.elapsed());
+    println!("{:?} | time: {:?}", solve(lines), timer.elapsed());
 }
