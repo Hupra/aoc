@@ -84,12 +84,14 @@ impl<T: Ord> PartialOrd for State<T> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Edge<T, C> {
     pub a: T,
     pub b: T,
     pub c: C,
 }
+
+#[derive(Clone)]
 pub struct Graph<T, C> {
     pub adj: HashMap<T, Vec<Edge<T, C>>>,
 }
