@@ -1,4 +1,6 @@
 use aoc_lib::init;
+use cached::proc_macro::cached;
+use itertools::Itertools;
 use rustlind_lib::*;
 use std::time::Instant;
 
@@ -11,7 +13,7 @@ fn p2(lines: Vec<String>) {
 }
 
 fn main() {
-    let lines = init(2023, 1);
+    let lines = init(2024, 1);
     let timer = Instant::now();
     println!("{:?} | time: {:?}", p1(lines.clone()), timer.elapsed());
     println!("{:?} | time: {:?}", p2(lines.clone()), timer.elapsed());
