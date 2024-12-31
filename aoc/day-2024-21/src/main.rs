@@ -2,7 +2,7 @@ use aoc_lib::init;
 use cached::proc_macro::cached;
 use itertools::Itertools;
 use rustlind_lib::*;
-use std::{collections::HashMap, sync::OnceLock, time::Instant, usize};
+use std::{ collections::HashMap, sync::OnceLock, time::Instant, usize };
 
 static NUM_HELPER: OnceLock<HashMap<(char, char), Vec<String>>> = OnceLock::new();
 
@@ -39,17 +39,12 @@ fn get_num_helper() -> &'static HashMap<(char, char), Vec<String>> {
 
         let inputs = "A^v<>";
         let perms = [
-            inputs
-                .chars()
-                .permutations(2)
-                .into_iter()
-                .collect::<Vec<Vec<char>>>(),
+            inputs.chars().permutations(2).into_iter().collect::<Vec<Vec<char>>>(),
             inputs
                 .chars()
                 .map(|c| vec![c, c])
                 .collect::<Vec<Vec<char>>>(),
-        ]
-        .concat();
+        ].concat();
 
         perms
             .into_iter()
@@ -117,10 +112,7 @@ fn find_paths(command: &str, pad: &HashMap<char, (i32, i32)>, skip: (i32, i32)) 
     all_paths
 }
 
-#[cached(
-    key = "(String, usize)",
-    convert = r#"{ (seq.to_string(), iterations) }"#
-)]
+#[cached(key = "(String, usize)", convert = r#"{ (seq.to_string(), iterations) }"#)]
 fn dp(seq: &str, iterations: usize) -> usize {
     if iterations == 0 {
         return seq.len();
@@ -168,10 +160,7 @@ fn solve(lines: Vec<String>) -> (usize, usize) {
             .min()
             .unwrap_or_default();
 
-        println!(
-            "NUM:{} | P1: {} | P2: {}",
-            numeric_code_part, min_path_p1, min_path_p2
-        );
+        println!("NUM:{} | P1: {} | P2: {}", numeric_code_part, min_path_p1, min_path_p2);
 
         sum_p1 += min_path_p1 * numeric_code_part;
         sum_p2 += min_path_p2 * numeric_code_part;

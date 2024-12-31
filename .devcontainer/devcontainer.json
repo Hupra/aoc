@@ -8,7 +8,14 @@
     "customizations": {
         "vscode": {
             "extensions": [
-                "rust-lang.rust-analyzer"
+                "rust-lang.rust-analyzer",
+		"jinxdash.prettier-rust",
+		"vadimcn.vscode-lldb",
+		"tamasfe.even-better-toml",
+		"fill-labs.dependi",
+		"usernamehw.errorlens",
+		"gruntfuggly.todo-tree",
+		"mechatroner.rainbow-csv"
             ]
         }
     },
