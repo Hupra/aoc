@@ -1,13 +1,15 @@
 use regex::Regex;
 use reqwest::blocking::Client;
-use reqwest::header::{ACCEPT, COOKIE, USER_AGENT};
+use reqwest::header::{ ACCEPT, COOKIE, USER_AGENT };
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{ BinaryHeap, HashMap, HashSet };
 use std::error::Error;
-use std::fs::{create_dir_all, File};
+use std::fs::{ create_dir_all, File };
 use std::io::Write;
 use std::path::Path;
-use std::{i32, usize};
+use std::{ i32, usize };
+
+pub mod utils;
 
 pub fn download_file(url: &str, dest: &str, session_cookie: &str) -> Result<(), Box<dyn Error>> {
     let dest_dir = Path::new(dest).parent().unwrap();
@@ -40,28 +42,28 @@ pub fn download_file(url: &str, dest: &str, session_cookie: &str) -> Result<(), 
 }
 
 pub fn valid_positions<T, D>(ij: (usize, usize), m: &Vec<Vec<T>>, d: D) -> Vec<(usize, usize)>
-where
-    D: IntoIterator<Item = (i32, i32)>,
+    where D: IntoIterator<Item = (i32, i32)>
 {
     valid_directions(ij, m, d)
         .into_iter()
-        .map(|(di, dj)| ((ij.0 as i32 + di) as usize, (ij.1 as i32 + dj) as usize))
+        .map(|(di, dj)| (((ij.0 as i32) + di) as usize, ((ij.1 as i32) + dj) as usize))
         .collect()
 }
 
 pub fn valid_directions<T, D>(ij: (usize, usize), m: &Vec<Vec<T>>, d: D) -> Vec<(i32, i32)>
-where
-    D: IntoIterator<Item = (i32, i32)>,
+    where D: IntoIterator<Item = (i32, i32)>
 {
     d.into_iter()
         .filter(|&(di, dj)| {
-            let new_i = ij.0 as i32 + di;
-            let new_j = ij.1 as i32 + dj;
+            let new_i = (ij.0 as i32) + di;
+            let new_j = (ij.1 as i32) + dj;
 
-            return new_i >= 0
-                && new_j >= 0
-                && (new_i as usize) < m.len()
-                && (new_j as usize) < m[0].len();
+            return (
+                new_i >= 0 &&
+                new_j >= 0 &&
+                (new_i as usize) < m.len() &&
+                (new_j as usize) < m[0].len()
+            );
         })
         .collect()
 }
@@ -96,10 +98,7 @@ pub struct Graph<T, C> {
     pub adj: HashMap<T, Vec<Edge<T, C>>>,
 }
 
-impl<T> Graph<T, i32>
-where
-    T: Eq + std::hash::Hash + Clone + Ord + std::fmt::Debug,
-{
+impl<T> Graph<T, i32> where T: Eq + std::hash::Hash + Clone + Ord + std::fmt::Debug {
     pub fn new() -> Self {
         Graph {
             adj: HashMap::new(),
@@ -292,7 +291,7 @@ where
             current: &T,
             start: &T,
             current_path: &mut Vec<T>,
-            all_paths: &mut Vec<Vec<T>>,
+            all_paths: &mut Vec<Vec<T>>
         ) {
             if current == start {
                 let mut path = current_path.clone();
@@ -344,14 +343,17 @@ where
 
         let res = longest_path_rec(ns, Vec::new(), &ng, nt);
 
-        let path = res.1.into_iter().map(|i| i_t[i].clone()).collect();
+        let path = res.1
+            .into_iter()
+            .map(|i| i_t[i].clone())
+            .collect();
         return (res.0, path);
 
         fn longest_path_rec(
             a: usize,
             mut v: Vec<usize>,
             g: &Graph<usize, i32>,
-            t: usize,
+            t: usize
         ) -> (i32, Vec<usize>) {
             if a == t {
                 v.push(a);
@@ -392,9 +394,7 @@ where
 
 impl<T, C> Graph<T, C> {
     pub fn map_graph<U, F>(self, mapper: F) -> Graph<U, C>
-    where
-        F: Fn(T) -> U,
-        U: std::cmp::Eq + std::hash::Hash,
+        where F: Fn(T) -> U, U: std::cmp::Eq + std::hash::Hash
     {
         let mut new_adj = HashMap::new();
 
@@ -416,10 +416,39 @@ impl<T, C> Graph<T, C> {
     }
 }
 
-pub fn poly_area<T>(points: Vec<(T, T)>) -> f64
-where
-    T: Into<f64> + Copy,
-{
+// for undirected graph
+impl<T, C> Graph<T, C> where T: Eq + std::hash::Hash + Clone + Ord + std::fmt::Debug {
+    pub fn find_triangles(&self) -> Vec<(T, T, T)> {
+        let mut visited: HashSet<T> = HashSet::new();
+        let mut trianlges: Vec<(T, T, T)> = Vec::new();
+
+        for (a, a_edges) in &self.adj {
+            visited.insert(a.clone());
+            for i in 0..a_edges.len() {
+                let a_b = &a_edges[i];
+                if visited.contains(&a_b.b) {
+                    continue;
+                }
+                for j in i + 1..a_edges.len() {
+                    let a_c = &a_edges[j];
+                    if visited.contains(&a_c.b) {
+                        continue;
+                    }
+                    if let Some(b_edges) = self.adj.get(&a_b.b) {
+                        for b_c in b_edges {
+                            if b_c.b == a_c.b {
+                                trianlges.push((a.clone(), a_b.b.clone(), a_c.b.clone()));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        trianlges
+    }
+}
+
+pub fn poly_area<T>(points: Vec<(T, T)>) -> f64 where T: Into<f64> + Copy {
     let mut area = 0.0;
     let n = points.len();
 
@@ -453,11 +482,15 @@ pub fn re_nums_usize(input: &str) -> Vec<usize> {
 }
 
 pub fn fnums(list: Vec<String>) -> Vec<i32> {
-    list.iter().map(|s| s.parse::<i32>().unwrap()).collect()
+    list.iter()
+        .map(|s| s.parse::<i32>().unwrap())
+        .collect()
 }
 
 pub fn fsplit(line: &str, split_on: &str) -> Vec<String> {
-    line.split(split_on).map(|s| s.to_string()).collect()
+    line.split(split_on)
+        .map(|s| s.to_string())
+        .collect()
 }
 
 pub fn re_nums_neg(input: &str) -> Vec<i32> {
@@ -469,7 +502,7 @@ pub fn re_nums_neg(input: &str) -> Vec<i32> {
 
 // Matrix magic
 pub fn get_or<T: Copy>(ij: (i32, i32), m: &Vec<Vec<T>>, or: T) -> T {
-    if ij.0 < 0 || ij.1 < 0 || ij.0 >= m.len() as i32 || ij.1 >= m[ij.0 as usize].len() as i32 {
+    if ij.0 < 0 || ij.1 < 0 || ij.0 >= (m.len() as i32) || ij.1 >= (m[ij.0 as usize].len() as i32) {
         return or;
     }
     return m[ij.0 as usize][ij.1 as usize];
