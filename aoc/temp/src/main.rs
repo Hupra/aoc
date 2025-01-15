@@ -22,21 +22,18 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    fn test_lines() -> Vec<String> {
-        include_str!("test.txt").lines().map(String::from).collect()
-    }
 
     #[test]
     fn test_p1() {
         let expected = None;
-        let actual = p1(test_lines());
+        let actual = p1(include_str!("test.txt").lines().map(String::from).collect());
         assert_eq!(actual, expected);
     }
 
     #[test]
     fn test_p2() {
         let expected = None;
-        let actual = p2(test_lines());
+        let actual = p2(include_str!("test.txt").lines().map(String::from).collect());
         assert_eq!(actual, expected);
     }
 }

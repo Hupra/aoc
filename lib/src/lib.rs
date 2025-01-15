@@ -7,6 +7,7 @@ use std::error::Error;
 use std::fs::{ create_dir_all, File };
 use std::io::Write;
 use std::path::Path;
+use std::sync::OnceLock;
 use std::{ i32, usize };
 
 pub mod utils;
@@ -467,9 +468,9 @@ pub fn poly_area<T>(points: Vec<(T, T)>) -> f64 where T: Into<f64> + Copy {
 }
 
 // Parsing stuff
-
+static RE_NUMS: OnceLock<Regex> = OnceLock::new();
 pub fn re_nums(input: &str) -> Vec<i32> {
-    let re = Regex::new(r"\d+").unwrap();
+    let re = RE_NUMS.get_or_init(|| Regex::new(r"\d+").unwrap());
     re.find_iter(input)
         .filter_map(|mat| mat.as_str().parse::<i32>().ok())
         .collect()

@@ -83,7 +83,6 @@ fn solve(lines: Vec<String>) -> Option<usize> {
     Some(combinations)
 }
 
-
 fn main() {
     let lines = init(2024, 25);
     let timer = Instant::now();
@@ -103,7 +102,4 @@ mod tests {
         let actual = solve(test_lines());
         assert_eq!(actual, expected);
     }
-
-
-    
 }
