@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y \
     libsqlite3-dev \
     python3-venv \
     graphviz \
+    tree \
     && apt-get clean
 
 # Create a virtual environment for Python

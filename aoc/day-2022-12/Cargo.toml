@@ -1,0 +1,12 @@
+[package]
+name = "day-2022-12"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rustlind-lib = { path = "../../lib" }
+aoc-lib = { path = "../aoc-lib" }
+regex = "1"
+itertools = "0.14"
+cached = "0.54.0"
+petgraph = "0.7.0"

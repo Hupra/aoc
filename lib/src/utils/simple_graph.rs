@@ -65,6 +65,24 @@ impl<L> Graph<L> where L: Hash + Eq + Clone {
     pub fn topological_sort(&mut self) -> Result<Vec<L>, String> {
         topological_sort(&self.adj).and_then(|list| Ok(self.indices_to_labels(&list)))
     }
+
+    pub fn bfs_distances(&mut self, s: L) -> Result<HashMap<L, usize>, String> {
+        if let Some(s) = self.labels.get(&s) {
+            let res = bfs_distances(&self.adj, *s);
+            if let Ok(list) = res {
+                let mapped = list
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, val)| (self.indices[i].clone(), val))
+                    .collect::<HashMap<L, usize>>();
+                Ok(mapped)
+            } else {
+                Err(res.err().unwrap_or_default())
+            }
+        } else {
+            Err(String::from("s: Invalid label"))
+        }
+    }
 }
 
 fn topological_sort(adj: &Vec<Vec<usize>>) -> Result<Vec<usize>, String> {
@@ -218,4 +236,35 @@ impl<L> Graph<L> where L: Hash + Eq + Clone + Display {
 
         Ok("yes".to_string())
     }
+}
+
+fn bfs_distances(adj: &Vec<Vec<usize>>, s: usize) -> Result<Vec<usize>, String> {
+    if adj.is_empty() {
+        return Err("The graph is empty".to_string());
+    }
+
+    let n = adj.len();
+    // Use usize::MAX to represent "infinity" (i.e. unreachable nodes)
+    let mut dist = vec![usize::MAX; n];
+    let mut queue = VecDeque::new();
+
+    // Start BFS from node s
+    dist[s] = 0;
+    queue.push_back(s);
+
+    while let Some(u) = queue.pop_front() {
+        for &v in &adj[u] {
+            // Ensure the neighbor index is within bounds.
+            if v >= n {
+                return Err(format!("Node index {} is out of bounds", v));
+            }
+            // If the node hasn't been visited yet, update its distance and enqueue it.
+            if dist[v] == usize::MAX {
+                dist[v] = dist[u] + 1;
+                queue.push_back(v);
+            }
+        }
+    }
+
+    Ok(dist)
 }

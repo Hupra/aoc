@@ -2,6 +2,7 @@
 members = [
     "lib",
     "aoc/aoc-lib",
-    "aoc/day-*",
+    "aoc/day-*", 
+    "uct",
 ]
 resolver = "2"
