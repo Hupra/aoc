@@ -1,0 +1,20 @@
+# Environment
+**/.env
+
+# Build output
+**/bin/
+**/obj/
+
+# IDE
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+
+# NuGet
+**/*.nupkg
+**/packages/
+
+# AoC Inputs
+src/AdventOfCode.Y*/Inputs/*.txt

@@ -1,0 +1,16 @@
+{
+	"name": "AoC C# Dev Container",
+    "build": {
+        "dockerfile": "./Dockerfile",
+        "context": "."
+    },
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"jetbrains.resharper-code",
+				"fill-labs.dependi",
+				"mechatroner.rainbow-csv"
+			]
+		}
+	}
+}

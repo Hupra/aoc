@@ -1,0 +1,24 @@
+dotnet sln AdventOfCode.sln add src/AdventOfCode.Core/AdventOfCode.Core.csproj
+dotnet sln AdventOfCode.sln add src/AdventOfCode.Runner/AdventOfCode.Runner.csproj
+dotnet sln AdventOfCode.sln add src/AdventOfCode.Y2025/AdventOfCode.Y2025.csproj
+dotnet sln AdventOfCode.sln add tests/AdventOfCode.Tests/AdventOfCode.Tests.csproj
+
+
+################################################
+
+# Runner references Core + Y2025
+dotnet add src/AdventOfCode.Runner reference src/AdventOfCode.Core/AdventOfCode.Core.csproj
+dotnet add src/AdventOfCode.Runner reference src/AdventOfCode.Y2025/AdventOfCode.Y2025.csproj
+
+# Y2025 references Core
+dotnet add src/AdventOfCode.Y2025 reference src/AdventOfCode.Core/AdventOfCode.Core.csproj
+
+# Tests reference Core + Y2025
+dotnet add tests/AdventOfCode.Tests reference src/AdventOfCode.Core/AdventOfCode.Core.csproj
+dotnet add tests/AdventOfCode.Tests reference src/AdventOfCode.Y2025/AdventOfCode.Y2025.csproj
+
+################################################
+
+
+./run 2025 1
+./run 2025 1 -t

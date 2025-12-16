@@ -1,0 +1,7 @@
+#!/bin/bash
+# filepath: /workspaces/aoc-2025/run
+
+set -e
+
+dotnet build src/AdventOfCode.Runner/AdventOfCode.Runner.csproj
+dotnet run --project src/AdventOfCode.Runner/AdventOfCode.Runner.csproj -- "$@"

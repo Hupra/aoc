@@ -1,0 +1,21 @@
+FROM mcr.microsoft.com/dotnet/sdk:9.0
+
+# Install curl and unzip if not already available
+RUN apt-get update && apt-get install -y curl unzip
+
+# Download Z3 Linux ARM64 release and extract native library
+RUN mkdir -p /usr/local/lib && \
+    curl -L -o /tmp/z3.zip \
+    https://github.com/Z3Prover/z3/releases/download/z3-4.15.4/z3-4.15.4-arm64-glibc-2.34.zip && \
+    unzip /tmp/z3.zip -d /tmp && \
+    cp /tmp/z3-4.15.4-arm64-glibc-2.34/bin/libz3.so /usr/local/lib/ && \
+    ldconfig && \
+    rm -rf /tmp/z3*
+
+# Create packages dir and download the Z3 .nupkg from GitHub
+RUN mkdir -p /packages && \
+    curl -L -o /packages/Microsoft.Z3.4.15.4.nupkg \
+    https://github.com/Z3Prover/z3/releases/download/z3-4.15.4/Microsoft.Z3.4.15.4.nupkg
+
+# Register local package source with dotnet
+RUN dotnet nuget add source /packages --name z3-local

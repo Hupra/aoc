@@ -1,0 +1,166 @@
+using AdventOfCode.Core;
+using Microsoft.Z3;
+
+namespace AdventOfCode.Y2025.Days;
+
+/*
+ * Should also be possible to shrink the squares by 0.4 units on each side
+ * and then we should be able to say that no edge should intersect the square
+ */
+[Day(2025, 12)]
+public sealed class Day12 : IDay
+{
+    public string SolvePart1(string input)
+    {
+        var lines = input.Split("\n\n", StringSplitOptions.RemoveEmptyEntries);
+        var pieces = lines
+            .SkipLast(1)
+            .Select(line => line.Split('\n'))
+            .Select(arr => arr.Skip(1).ToList())
+            .Select(grid =>
+            {
+                var piece = new int[3, 3];
+                for (var y = 0; y < grid.Count; y++)
+                for (int x = 0; x < grid[y].Length; x++)
+                    if (grid[y][x] == '#')
+                        piece[x, y] = 1;
+
+                return piece;
+            })
+            .ToList();
+
+        var puzzles = lines
+            .Last()
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries)
+            .Select(line =>
+                {
+                    var parts = line
+                        .Split(' ')
+                        .ToList();
+                    var xy = parts.First()[..^1].Split('x').Select(int.Parse).ToArray();
+                    var gird = new int[xy[0], xy[1]];
+                    var todo = parts
+                        .Skip(1)
+                        .Select(int.Parse)
+                        .ToArray();
+                    return (gird, todo);
+                }
+            )
+            .ToList();
+
+        foreach (var (grid, todo) in puzzles)
+        {
+            using var ctx = new Context();
+            using var solver = ctx.MkOptimize();
+
+            // Grid ---------------------------------------------------------
+            var gridVars = new Dictionary<string, IntExpr>();
+
+            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var j = 0; j < grid.GetLength(1); j++)
+                gridVars[$"{i},{j}"] = ctx.MkIntConst($"{i},{j}");
+
+            // Constrain each grid position to be 0 or 1
+            foreach (var v in gridVars.Values)
+            {
+                solver.Add(ctx.MkGe(v, ctx.MkInt(0)));
+                solver.Add(ctx.MkLe(v, ctx.MkInt(1)));
+            }
+
+            // Pieces -------------------------------------------------------
+            var gridContributions = new Dictionary<string, List<IntExpr>>();
+
+            // Initialize contribution lists for each grid cell
+            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var j = 0; j < grid.GetLength(1); j++)
+                gridContributions[$"{i},{j}"] = new List<IntExpr>();
+
+            for (var p = 0; p < pieces.Count; p++)
+            {
+                var piece = pieces[p];
+                var piecePlacements = new List<IntExpr>();
+
+                // try place piece here:
+                for (var i = 0; i < grid.GetLength(0) - 2; i++)
+                for (var j = 0; j < grid.GetLength(1) - 2; j++)
+                {
+                    var pieceVarIj = ctx.MkIntConst($"{p},{i},{j}");
+                    piecePlacements.Add(pieceVarIj);
+
+                    // Constrain placement variable to 0 or 1
+                    solver.Add(ctx.MkGe(pieceVarIj, ctx.MkInt(0)));
+                    solver.Add(ctx.MkLe(pieceVarIj, ctx.MkInt(1)));
+
+                    // If piece is placed, grid cells it covers must be 1
+                    // pieceVarIj <= gridVar (if piece=1, grid must be 1)
+                    for (var pi = 0; pi < piece.GetLength(0); pi++)
+                    for (var pj = 0; pj < piece.GetLength(1); pj++)
+                    {
+                        if (piece[pi, pj] == 1)
+                        {
+                            var gridX = i + pi;
+                            var gridY = j + pj;
+                            var gridVar = gridVars[$"{gridX},{gridY}"];
+                            solver.Add(ctx.MkLe(pieceVarIj, gridVar));
+                            gridContributions[$"{gridX},{gridY}"].Add(pieceVarIj);
+                        }
+                    }
+                }
+
+                // Each piece type must be used exactly todo[p] times
+                var placementSum = ctx.MkAdd(piecePlacements.Cast<ArithExpr>().ToArray());
+                solver.Add(ctx.MkEq(placementSum, ctx.MkInt(todo[p])));
+            }
+
+            // Grid cell must be 1 if and only if exactly one piece covers it
+            for (var i = 0; i < grid.GetLength(0); i++)
+            for (var j = 0; j < grid.GetLength(1); j++)
+            {
+                var key = $"{i},{j}";
+                var gridVar = gridVars[key];
+                var contributions = gridContributions[key];
+
+                if (contributions.Count == 0)
+                {
+                    // No piece can cover this cell, so it must be 0
+                    solver.Add(ctx.MkEq(gridVar, ctx.MkInt(0)));
+                }
+                else
+                {
+                    // Grid cell = sum of pieces covering it (which is 0 or 1 due to overlap constraint)
+                    var sum = ctx.MkAdd(contributions.Cast<ArithExpr>().ToArray());
+                    solver.Add(ctx.MkEq(gridVar, sum));
+                }
+            }
+
+            var status = solver.Check();
+            if (status == Status.SATISFIABLE)
+            {
+                var model = solver.Model;
+                Console.WriteLine("Solution found!");
+                // Print grid solution
+                for (var j = 0; j < grid.GetLength(1); j++)
+                {
+                    for (var i = 0; i < grid.GetLength(0); i++)
+                    {
+                        var val = model.Evaluate(gridVars[$"{i},{j}"]);
+                        Console.Write(val.ToString() == "1" ? "#" : ".");
+                    }
+
+                    Console.WriteLine();
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No solution: {status}");
+            }
+        }
+
+        return "";
+    }
+
+    public string SolvePart2(string input)
+    {
+        return "";
+    }
+}
